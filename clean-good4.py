@@ -1,7 +1,7 @@
 import pandas as pd
 
 df = pd.read_csv(
-    'archive/spotify_dataset.csv',
+    '../archive/spotify_dataset.csv',
     engine='python',
     on_bad_lines='skip'
 )
