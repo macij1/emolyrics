@@ -43,15 +43,11 @@ print("Loaded dataset with shape:", df.shape)
 '''
 
 label_cols = [
-    "Good for Party",
-    "Good for Work/Study",
-    "Good for Relaxation/Meditation",
-    "Good for Exercise",
-    "Good for Running",
-    "Good for Yoga/Stretching",
-    "Good for Driving",
-    "Good for Social Gatherings",
-    "Good for Morning Routine"
+    "joy"
+    "sadness"
+    "anger"
+    "fear"
+    "surprise"
 ]
 
 # Clean rows where any label is NaN: convert NaN → 0
