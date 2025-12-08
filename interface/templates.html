@@ -1,0 +1,22 @@
+<!-- HEADER_TEMPLATE_START -->
+<div class="app-header">
+    <div class="app-badge">
+        <span class="app-badge-dot"></span>
+        <span>Songwriting insight engine</span>
+    </div>
+    <div class="title-text">EmoLyrics AI</div>
+    <div class="subtitle-text">
+        Analyze the emotional profile of your lyrics and check if they convey what you intend.
+    </div>
+</div>
+<!-- HEADER_TEMPLATE_END -->
+
+<!-- RESULT_CARD_TEMPLATE_START -->
+<div class="result-card {{EMOTION_CLASS}}">
+    <div class="result-label">Dominant emotion</div>
+    <p class="result-emotion">{{EMOTION_NAME}}</p>
+    <p class="result-intensity">
+        Detected intensity: <b>{{SCORE}}</b>
+    </p>
+</div>
+<!-- RESULT_CARD_TEMPLATE_END -->

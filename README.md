@@ -28,3 +28,6 @@ This will install all required dependencies with correct versions.
 
 #### Activate the environment
 `conda activate iao`
+
+#### Install additional packages
+`conda install -c conda-forge streamlit altair pandas matplotlib`

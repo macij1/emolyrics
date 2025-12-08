@@ -1,0 +1,211 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+/* ---------- Base Layout ---------- */
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
+
+main {
+    background: radial-gradient(circle at top left, #eff6ff 0, #f9fafb 45%, #fdf2f8 100%);
+}
+
+.block-container {
+    max-width: 1200px;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+/* ---------- header / branding ---------- */
+
+.app-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 2.5rem;
+}
+
+.app-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.app-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #22c55e;
+}
+
+.title-text {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.1rem;
+}
+
+.subtitle-text {
+    font-size: 0.96rem;
+    color: #6b7280;
+}
+
+/* ---------- Titles ---------- */
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.8rem;
+}
+
+.section-title span.icon {
+    font-size: 1.2rem;
+}
+
+/* ---------- Controls ---------- */
+
+.stRadio > label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #111827;
+}
+
+div[role="radiogroup"] {
+    gap: 1rem !important;
+}
+
+.stTextArea textarea {
+    border-radius: 16px;
+    border: 1px solid #E5E7EB;
+    padding: 14px 14px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
+    font-size: 0.9rem;
+    transition: border 0.25s ease, box-shadow 0.25s ease, transform 0.05s ease;
+    background: #f9fafb;
+}
+
+.stTextArea textarea:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 14px 32px rgba(79, 70, 229, 0.20);
+    transform: translateY(-1px);
+}
+
+section[data-testid="stFileUploadDropzone"] {
+    border-radius: 14px !important;
+    border: 1px dashed #d4d4d8 !important;
+    background-color: #f9fafb !important;
+}
+
+/* ---------- Primary Button ---------- */
+
+.stButton > button {
+    background-image: linear-gradient(135deg, #4f46e5, #ec4899);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 0.6rem 1.6rem;
+    font-weight: 600;
+    border: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    box-shadow: 0 16px 30px rgba(236, 72, 153, 0.35);
+    transition: transform 0.1s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.stButton > button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+    box-shadow: 0 20px 40px rgba(79, 70, 229, 0.4);
+}
+
+.stButton > button:active {
+    transform: translateY(0px) scale(0.99);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.3);
+}
+
+/* ---------- Result cards ---------- */
+
+.result-card {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    border-left: 5px solid transparent;
+    background-color: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.result-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.result-emotion {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.result-intensity {
+    font-size: 0.92rem;
+    color: #4b5563;
+    margin: 0;
+}
+
+/* Motion controls */
+
+.result-card.Anger {
+    background-color: #E6394610;
+    border-left-color: #E63946;
+}
+.result-card.Anger .result-emotion { color: #E63946; }
+
+.result-card.Fear {
+    background-color: #F4A26110;
+    border-left-color: #F4A261;
+}
+.result-card.Fear .result-emotion { color: #F4A261; }
+
+.result-card.Joy {
+    background-color: #2A9D8F10;
+    border-left-color: #2A9D8F;
+}
+.result-card.Joy .result-emotion { color: #2A9D8F; }
+
+.result-card.Love {
+    background-color: #E76F5110;
+    border-left-color: #E76F51;
+}
+.result-card.Love .result-emotion { color: #E76F51; }
+
+.result-card.Sadness {
+    background-color: #457B9D10;
+    border-left-color: #457B9D;
+}
+.result-card.Sadness .result-emotion { color: #457B9D; }
+
+.result-card.Surprise {
+    background-color: #8D99AE10;
+    border-left-color: #8D99AE;
+}
+.result-card.Surprise .result-emotion { color: #8D99AE; }
+
+footer {
+    visibility: hidden;
+}
