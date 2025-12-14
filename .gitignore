@@ -1,2 +1,5 @@
 *.csv
 runs/
+logs/
+data/
+copies_for_parallelization/

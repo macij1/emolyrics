@@ -1,11 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import re
 
 # Configuration
 INPUT_FILE = "data/spotify_dataset.csv"
 OUTPUT_FILE = "data/spotify_emotion_clean.csv"
 
-TEXT_COL = "lyrics"      # standardized name for lyrics/text
+TEXT_COL = "lyrics"
 CLASS_COL = "emotion"    # class column
 ARTIST_COL = "artist"
 SONG_COL = "song_title"
@@ -15,8 +16,7 @@ MIN_TEXT_LEN = 30
 MAX_TEXT_LEN = 10_000
 
 # Minimum number of samples per class to keep
-# (You can change this threshold as you like)
-MIN_SAMPLES_PER_CLASS = 20
+MIN_SAMPLES_PER_CLASS = 5000
 
 
 def plot_emotion_distribution(df: pd.DataFrame, title: str) -> None:
@@ -87,6 +87,14 @@ def remove_duplicate_artist_song(df: pd.DataFrame) -> pd.DataFrame:
     plot_emotion_distribution(df, "After removing duplicate artist+song pairs")
     return df
 
+def strip_section_tags(df: pd.DataFrame) -> pd.DataFrame:
+    SECTION_TAG_RE = re.compile(r"\[[^\]]+\]")
+    df = df.copy()
+    df[TEXT_COL] = df[TEXT_COL].str.replace(SECTION_TAG_RE, " ", regex=True)
+    df[TEXT_COL] = df[TEXT_COL].str.replace(r"\s+", " ", regex=True).str.strip()
+    print("After stripping [Intro]/[Verse]/[Chorus] tags:", df.shape)
+    plot_emotion_distribution(df, "After stripping section tags")
+    return df
 
 def filter_by_text_length(df: pd.DataFrame) -> pd.DataFrame:
     """Step 3: Remove very short (<MIN_TEXT_LEN) or very long (>MAX_TEXT_LEN) lyrics."""
@@ -137,6 +145,12 @@ def normalize_emotion_labels(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def remove_specific_artist_songs(df: pd.DataFrame, artist_name: str) -> pd.DataFrame:
+    df = df.copy()
+    df = df[df[ARTIST_COL] != artist_name]
+    print("After removing specific artist's songs:", df.shape)
+    plot_emotion_distribution(df, "After removing specific artist's songs")
+    return df
 
 def main():
     # Load + standardize
@@ -157,10 +171,16 @@ def main():
     # 2. Remove duplicate artist+song pairs
     df = remove_duplicate_artist_song(df)
 
-    # 3. Remove very short/very long texts
+    # 3. Remove specific artist's songs
+    df = remove_specific_artist_songs(df, "L.A.B.")
+
+    # 4. Strip section tags
+    df = strip_section_tags(df)
+
+    # 5. Remove very short/very long texts
     df = filter_by_text_length(df)
 
-    # 4. Remove very few classes (you define the threshold)
+    # 6. Remove classes with very few samples
     df = remove_rare_classes(df)
 
     # Save cleaned dataset
