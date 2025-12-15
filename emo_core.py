@@ -3,19 +3,22 @@ from __future__ import annotations
 
 import random
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional, Tuple
 
 import altair as alt
+import joblib
 import pandas as pd
 import streamlit as st
-
+import torch
+from sentence_transformers import SentenceTransformer
+from training.test_inference import LinearReLUDropoutLinearNet
 
 # =========================================================
 # Config / constants
 # =========================================================
 
 # Fixed order of emotions in the chart
-EMOTION_ORDER = ["Anger", "Fear", "Joy", "Love", "Sadness", "Surprise"]
+EMOTION_ORDER = ["Anger", "Fear", "Joy", "Love", "Sadness"]
 
 # Color palette for each emotion
 COLOR_MAP = {
@@ -24,7 +27,6 @@ COLOR_MAP = {
     "Joy": "#2A9D8F",
     "Love": "#E76F51",
     "Sadness": "#457B9D",
-    "Surprise": "#8D99AE",
 }
 
 # Session state keys
@@ -36,9 +38,15 @@ SESSION_KEY_VERSIONS = "saved_versions_df"
 BASE_DIR = Path(__file__).parent
 CSS_FILE = BASE_DIR / "interface/styles.css"
 TEMPLATES_FILE = BASE_DIR / "interface/templates.html"
+MODEL_PATH = BASE_DIR / "training" / "models" / "emotion_classifier_v2.pt"
 
 # Templates cache
 TEMPLATES_CACHE: str | None = None  # loaded lazily
+
+# Model cache (loaded once per session)
+MODEL_CACHE: Optional[Tuple[torch.nn.Module, SentenceTransformer, Optional[object]]] = None
+
+MOCK_MODEL = False
 
 
 # =========================================================
@@ -139,21 +147,87 @@ def render_result_card(emotion: str, score: float) -> None:
 # Model / scores
 # =========================================================
 
+def _load_model() -> Tuple[torch.nn.Module, SentenceTransformer, Optional[object]]:
+    """
+    Load the emotion classification model, SentenceTransformer, and scaler.
+    Uses caching to avoid reloading on every call.
+    """
+    global MODEL_CACHE
+    
+    if MODEL_CACHE is not None:
+        return MODEL_CACHE
+    
+    if not MODEL_PATH.exists():
+        raise FileNotFoundError(
+            f"Model checkpoint not found at {MODEL_PATH}. "
+            "Please train the model first or check the path."
+        )
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Load checkpoint dictionary
+    checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=False)
+    
+    # Extract model parameters from checkpoint
+    input_dim = checkpoint["input_dim"]
+    num_classes = checkpoint["n_classes"]
+    
+    # Create and load model
+    model = LinearReLUDropoutLinearNet(input_dim=input_dim, num_classes=num_classes).to(device)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()  # Set to evaluation mode
+    
+    # Load SentenceTransformer
+    sentence_transformer_name = checkpoint.get("sentence_transformer_name", "all-MiniLM-L6-v2")
+    sentence_transformer = SentenceTransformer(sentence_transformer_name)
+    
+    # Load scaler if needed
+    scaler = None
+    if checkpoint.get("scale_embeddings", False):
+        scaler_path = MODEL_PATH.parent / "scaler.joblib"
+        if scaler_path.exists():
+            scaler = joblib.load(scaler_path)
+        else:
+            st.warning(f"Scaler file not found at {scaler_path}, proceeding without scaling")
+    
+    # Cache the loaded model
+    MODEL_CACHE = (model, sentence_transformer, scaler)
+    return MODEL_CACHE
+
+
 def generate_emotion_scores(lyrics: str) -> Dict[str, float]:
     """
     Generate emotion scores for a given lyrics string.
 
-    AHORA MISMO: placeholder con valores aleatorios normalizados.
-    SUSTITUYE este cuerpo por tu pipeline real:
-      - SentenceTransformer(all-MiniLM-L6-v2)
-      - Red 768x9 + softmax
-
-    Devuelve un dict {emotion: score} donde los scores suelen sumar 1.
+    Returns a dict {emotion: score} where scores sum to 1.
     """
-    raw_values = {emotion: random.random() for emotion in EMOTION_ORDER}
-    total = sum(raw_values.values()) or 1.0
-    return {k: v / total for k, v in raw_values.items()}
-
+    if MOCK_MODEL:
+        raw_values = {emotion: random.random() for emotion in EMOTION_ORDER}
+        total = sum(raw_values.values()) or 1.0
+        return {k: v / total for k, v in raw_values.items()}
+    
+    try:
+        model, sentence_transformer, scaler = _load_model()
+        device = next(model.parameters()).device
+        
+        # Generate embedding
+        embedding = sentence_transformer.encode(lyrics, convert_to_numpy=True)
+        
+        # Apply scaler if available
+        if scaler is not None:
+            embedding = scaler.transform(embedding.reshape(1, -1))[0]
+        
+        # Convert to tensor and predict
+        x = torch.from_numpy(embedding).float().unsqueeze(0).to(device)
+        with torch.no_grad():
+            logits = model(x)
+            probs = torch.softmax(logits, dim=1)[0].cpu().numpy()
+        
+        return {emotion: float(score) for emotion, score in zip(EMOTION_ORDER, probs)}
+    
+    except Exception as e:
+        st.error(f"Error generating emotion scores: {str(e)}")
+        return {emotion: 0.0 for emotion in EMOTION_ORDER}
 
 # =========================================================
 # Versions storage (session only, no disk)
