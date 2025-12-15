@@ -109,10 +109,6 @@ ESTRUCTURA DE CARPETAS Y ARCHIVOS
            └── Escalador StandardScaler guardado para normalizar embeddings
                antes de la inferencia (si se utilizó durante el entrenamiento).
 
-📁 __pycache__/
-   └── Directorio generado automáticamente por Python con archivos .pyc
-       compilados (no incluido en el .zip, generado en ejecución).
-
 INSTRUCCIONES BÁSICAS PARA EJECUTAR LOS EXPERIMENTOS
 --------------------------------------------------------------------------------
 
